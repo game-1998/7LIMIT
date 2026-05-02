@@ -135,7 +135,7 @@ document.getElementById("confirmTarget").onclick = () => {
       <div class="center-target">
         ターゲット：<br>
         <span class="second-line">
-          ${targetName} の ${labelFromType(targetPlayer.gauges[gaugeIdx].type)} ゲージ
+          ${targetName} の 「${labelFromType(targetPlayer.gauges[gaugeIdx].type)}」 ゲージ
         </span>
       </div>
       ${cardHtml}

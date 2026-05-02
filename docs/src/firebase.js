@@ -145,7 +145,7 @@ export function watchGameState(roomId) {
       const { uid, gaugeType, value } = state.gaugeEvent;
       const playerName = state.players[uid].name;
 
-      showGaugePopup(`${playerName} の ${gaugeType} が MAX (${value}) に到達！`);
+      showGaugePopup(`${playerName} の 「${labelFromType(gaugeType)}」 がリミットに到達！`);
     }
 
     // カード使用イベント検知
@@ -167,7 +167,7 @@ export function watchGameState(roomId) {
           <div class="center-target">
             ターゲット：<br>
             <span class="second-line">
-              ${targetName} の ${labelFromType(targetPlayer.gauges[gaugeIdx].type)} ゲージ
+              ${targetName} の 「${labelFromType(targetPlayer.gauges[gaugeIdx].type)}」 ゲージ
             </span>
           </div>
           ${cardHtml}

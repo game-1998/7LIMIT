@@ -1,0 +1,491 @@
+html, body {
+  overflow: hidden;
+  overscroll-behavior: none;
+  text-align: center;
+  height: 100%;
+}
+
+/* --- タイトル画面 ------------------------------------------------------------- */
+#titleScreen {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* 上寄り */
+  align-items: center;        /* 横方向中央 */
+  padding-top: 18vh;
+  text-align: center;
+}
+
+/* タイトル */
+#titleScreen h1 {
+  font-size: 64px;          /* ← さらに大きくして存在感アップ */
+  font-weight: 900;
+  margin-bottom: 32px;
+
+  /* 金色グラデーション（透明化しない） */
+  color: #00b646;           /* ← 透明にしないので見やすい */
+
+  /* 強めの影で輪郭をはっきり */
+  text-shadow:
+    0 0 4px rgba(0,0,0,0.4),
+    0 4px 8px rgba(0,0,0,0.35),
+    0 0 20px rgba(0, 143, 24, 0.5);
+
+  letter-spacing: 3px;
+}
+
+/* ボタンを縦に並べる */
+#titleScreen button {
+  width: 240px;
+  padding: 14px 0;
+  margin: 10px 0;
+  font-size: 18px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* --- プレイヤー名・パスワード入力画面 ----------------------------------------- */
+#nameAndPasswordScreen {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* 上寄り */
+  align-items: center;        /* 横方向中央 */
+  padding-top: 16vh;
+  text-align: center;
+}
+
+#nameAndPasswordScreen input {
+  display: block;
+  width: 10rem;
+  margin: 6px auto 45px auto; /* ← 下の余白を広げる */
+  padding: 10px;
+  font-size: 16px;
+  text-align: center;
+}
+
+#nameAndPasswordScreen button {
+  margin: 16px auto; /* ← 自動で中央寄せ＋縦並び */
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+/* --- ロビー --------------------------------------------------------------- */
+#lobbyScreen p {
+  margin-bottom: 50px;
+}
+
+#playerList {
+  list-style: none; /* ← これで「・」を消す */
+  padding: 0;
+  text-align: center; /* ← 中央揃え */
+  margin-bottom: 50px;
+}
+
+#playerList li {
+  margin: 6px 0;
+  font-size: 20px;
+}
+
+#startGameButton {
+  margin: 20px auto;  /* ← 自動で左右中央寄せ */
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+/* --- プレイヤー順表示 ------------------------------------------------------- */
+#orderList {
+  text-align: left;      /* 左揃え */
+  margin-left: 41vw; 
+  font-size: 20px;
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+/* --- ゲーム画面 ------------------------------------------------------------- */
+#gameScreen {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  box-sizing: border-box; /* ← padding を含めて 100dvh に収める */
+  overflow: hidden;
+}
+
+/* --- 上部：ターン情報 --- */
+.top-info {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 20px;
+  font-size: 18px;
+}
+
+.turn-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin: 0 6px;
+  display: inline-block;
+}
+
+.turn-badge.active {
+  border: 2px solid #2e7d32;      /* 濃い緑 */
+  background: #c8e6c9;            /* 薄い緑 */
+}
+
+.turn-badge.me {
+  font-weight: bold;              /* 自分の名前を強調 */
+}
+
+ /* --- ゲージ情報エリア --- */
+#playerScrollArea {
+  flex: 1 1 auto;     /* ← 余った高さを全部使う */
+  overflow-y: auto;   /* ← 縦スクロール */
+  padding: 0 10px;
+  min-height: 0;
+}
+
+/* プレイヤー一覧 */
+.player-area {
+  margin-top: 20px;
+  padding: 0 10px;
+}
+
+.player-block {
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.player-name {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.gauge-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gauge-line {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.gauge-label {
+  width: 48px;
+  font-size: 12px;
+  text-align: center;
+  color: black;
+  padding: 2px 4px;
+  border-radius: 11px;
+  margin-right: 5px;
+}
+
+/* ラベルの背景色をゲージと揃える */
+.gauge-label-hanki { background: #4dc7f7; }
+.gauge-label-mansui { background: #ffd43b; }
+.gauge-label-cap { background: #ff80a0; }
+
+/* メモリ＋ゲージ本体をまとめる */
+.gauge-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 70%;
+}
+
+/* 上の 0〜7 メモリ */
+.gauge-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  margin-bottom: 2px;
+  width: calc(100% + 4px);
+  margin-left: -2px;
+  margin-bottom: -1px;
+}
+
+/* ゲージ枠 */
+.gauge-block {
+  position: relative;
+  width: 100%;
+  height: 12px;
+  background: #5555557e;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* 内部の縦点線（1〜6） */
+.gauge-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  pointer-events: none;
+}
+
+.gauge-grid div {
+  border-right: 1px dashed #eee;
+}
+.gauge-grid div:last-child {
+  border-right: none;
+}
+
+.gauge-bar {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 1s ease-in-out;
+}
+
+.gauge-hanki { background: #4dc7f7; }
+.gauge-mansui { background: #ffd43b; }
+.gauge-cap { background: #ff80a0; }
+
+.locked {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+
+/* 効果表示 */
+.status {
+  font-size: 14px;
+  text-align: center;
+  color: #555;
+}
+
+/* --- カード効果対象選択 --- */
+.target-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 999;
+}
+
+.target-panel.hidden {
+  display: none;
+}
+
+.target-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.target-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+}
+
+.target-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 16px;
+}
+
+.target-item input {
+  margin-right: 8px;
+}
+
+.confirm-btn {
+  padding: 10px 20px;
+  margin-top: 20px;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.gauge-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 16px;
+}
+
+.gauge-item input {
+  margin-right: 8px;
+}
+
+.gauge-name {
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+.gauge-value {
+  color: #555;
+}
+
+/* --- ゲージマックス演出 --- */
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.5);
+}
+
+.popup-content {
+  background: #222;
+  color: #fff;
+  padding: 20px 30px;
+  border-radius: 12px;
+  text-align: center;
+  animation: popupFade 0.3s ease-out;
+}
+
+.hidden {
+  display: none;
+}
+
+@keyframes popupFade {
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* --- 選択カード中央表示 --- */
+.center-card-wrapper {
+  display: flex;
+  flex-direction: column; /* 上から下へ並べる */
+  align-items: center;
+  width: 100dvw;
+}
+
+#centerCard {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+#centerCard .card {
+  width: 50dvw;
+}
+#centerCard.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.2);
+}
+#centerCard.fadeout {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+
+.center-target {
+  background: #222;
+  z-index: 9999;
+  margin-bottom: 12px;
+  text-align: left;
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 0 4px #000;
+  padding: 8px 22px;
+  border-radius: 6px;
+}
+.second-line {
+  display: block;
+  padding-left: 1em; /* ← ここで1文字分の空白 */
+}
+
+/* --- 手札 --- */
+#handArea {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 3%;
+  padding: 10px 12px;
+  margin-bottom: 20px;
+}
+
+.card-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  background: transparent;
+  width: 30%;
+  flex: 0 0 auto; /* 伸び縮みしないように固定 */
+}
+
+.card {
+  aspect-ratio: 2 / 3;
+  width: 100%;
+  background: #eee;
+  border-radius: 8px;
+  border: 2px solid #aaa;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.card.empty {
+  opacity: 0;        /* ← 空スロットは透明にする */
+  pointer-events: none;
+}
+
+.card-name {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.card-desc {
+  font-size: 12px;
+  color: #444;
+  line-height: 1.2;
+}
+
+@keyframes cardPulse {
+  0% {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 215, 0, 0.1),
+      0 0 8px 0 rgba(255, 215, 0, 0.1);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 215, 0, 0.8),
+      0 0 8px 0 rgba(255, 215, 0, 0.6);
+  }
+  100% {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 215, 0, 0.1),
+      0 0 8px 0 rgba(255, 215, 0, 0.1);
+  }
+}
+
+.card-glow {
+  animation: cardPulse 2s ease-in-out infinite;
+}
+
+.card-selected {
+  box-shadow: inset 0 0 0 3px #ffd700, 0 0 8px #ffd700;
+  border-color: #ffd700;
+}
+

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- タイトル画面 -->
+  <div id="titleScreen">
+    <h1>7リミット</h1>
+
+    <button id="createRoomButton">ルームを作成</button>
+    <button id="joinRoomButton">ルームに参加</button>
+    <button id="openSkillListButton">スキル一覧</button>
+  </div>
+
+  <div id="nameAndPasswordScreen" style="display:none;">
+    <h2>プレイヤー名</h2>
+    <input id="playerNameInput" type="text" placeholder="プレイヤー名" />
+
+    <h2>ルームパスワード</h2>
+    <input id="roomPasswordInput" type="text" placeholder="ルームパスワード" />
+
+    <button id="confirmButton">決定</button>
+  </div>
+
+  <!-- ルーム作成後の画面<div id="roomCreatedScreen" style="display:none;">
+    <h2>ルームを作成しました</h2>
+    <p>ルームパスワード: <span id="roomIdDisplay"></span></p>
+    <p>他のプレイヤーにこのパスワードを伝えてください</p>
+    <button id="goToLobbyButton">ロビーへ</button>
+  </div> -->
+  
+
+  <!-- ロビー画面 -->
+  <div id="lobbyScreen" style="display:none;">
+    <h2>ロビー</h2>
+
+    <p>ルームパスワード: <span id="lobbyRoomPassword"></span></p>
+
+    <h3>参加者</h3>
+    <ul id="playerList"></ul>
+
+    <button id="startGameButton" style="display:none;">ゲーム開始</button>
+  </div>
+
+  <!-- 順番表示画面 -->
+  <div id="orderScreen" style="display:none;">
+    <h2>プレイヤー順</h2>
+    <div id="orderList"></div>
+    <button id="orderOkButton">OK</button>
+  </div>
+
+  <!-- ゲーム画面 -->
+  <div id="gameScreen" style="display:none;">
+
+    <!-- 上部：ターン情報＋山札 -->
+    <div id="topInfo" class="top-info">
+      <span id="turnInfo"></span>
+      <span id="deckInfo"></span>
+    </div>
+
+    <!-- 中央：プレイヤー一覧（ゲージ3本＋名前＋効果） -->
+    <div id="playerScrollArea">
+      <div class="player-area" id="playerArea"></div>
+    </div>
+
+    <div id="targetPanel" class="target-panel hidden">
+      <div class="target-header">
+        <span>ターゲット選択</span>
+        <button id="closeTargetPanel" class="close-btn">×</button>
+      </div>
+
+      <div id="targetList" class="target-list">
+        <!-- JS でプレイヤー一覧をチェック付きで生成 -->
+      </div>
+
+      <div id="targetGaugeList"></div>
+      <button id="confirmTarget" class="confirm-btn">確定</button>
+    </div>
+
+    <div id="gaugePopup" class="popup hidden">
+      <div class="popup-content">
+        <p id="gaugePopupText"></p>
+        <button id="gaugePopupClose">OK</button>
+      </div>
+    </div>
+
+    <div id="centerCard" class="hidden"></div>
+
+    <!-- 下部：自分の手札（自分だけが見える） -->
+    <div id="handArea">
+      <div class="card-slot" id="card0"></div>
+      <div class="card-slot" id="card1"></div>
+      <div class="card-slot" id="card2"></div>
+    </div>
+
+  </div>
+
+  <script type="module" src="src/main.js?v=202604026"></script>
+</body>
+</html>

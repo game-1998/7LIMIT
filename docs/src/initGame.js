@@ -43,6 +43,7 @@ export function createInitialDeck() {
 
 export async function startGame(roomId, players) {
   const deck = createInitialDeck();
+  window.gaugePopup = false;
 
   // とりあえず全員に2枚ずつ配る
   const gamePlayers = {};
@@ -79,11 +80,18 @@ export async function startGame(roomId, players) {
     firstPlayer.hand.push(remainingDeck.shift());
   }
 
+  // 前回のゲージ DOM を完全に削除
+  const area = document.getElementById("playerArea");
+  area.innerHTML = "";
+
   const gameState = {
+    phase: "playing",
     deck: remainingDeck,
+    deckCount: remainingDeck.length,
     turn: firstTurnUid,
     players: gamePlayers,
     turnOrder: players.map(p => p.uid),
+    gameOver: false
   };
 
   await set(ref(firebaseDB, `rooms/${roomId}/gameState`), gameState);

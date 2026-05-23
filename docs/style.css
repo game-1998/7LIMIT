@@ -190,7 +190,8 @@ html, body {
 .gauge-wrapper {
   display: flex;
   flex-direction: column;
-  width: 70%;
+  height: 26px;
+  width: 60%;
 }
 
 /* 上の 0〜7 メモリ */
@@ -198,7 +199,6 @@ html, body {
   display: flex;
   justify-content: space-between;
   font-size: 10px;
-  margin-bottom: 2px;
   width: calc(100% + 4px);
   margin-left: -2px;
   margin-bottom: -1px;
@@ -248,21 +248,42 @@ html, body {
   pointer-events: none;
 }
 
-
-/* 効果表示 */
-.status {
-  font-size: 14px;
-  text-align: center;
-  color: #555;
+.gauge-effect .gauge-link {
+  width: 26px;
+}
+/* 効果アイコン表示 */
+.effect-icon {
+  width: 23px;
+  height: 23px;
+  vertical-align: middle;
 }
 
-/* --- カード効果対象選択 --- */
+/* --- ターゲット選択パネル --- */
+#selectedTargetSummary {
+  text-align: left;
+  color: rgb(255, 0, 0);
+  margin-bottom: 1em;
+}
+
+.summary-divider {
+  border-bottom: 1px dashed transparent;
+  border-image: repeating-linear-gradient(
+    to right,
+    black 0,
+    black 10px,   /* ← 破線1本の長さ */
+    transparent 10px,
+    transparent 20px /* ← 隙間の長さ */
+  ) 1;
+  width: 100%;
+  margin-top: 0.5em;
+}
+
 .target-panel {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 280px;
+  width: 22em;
   background: white;
   border-radius: 12px;
   padding: 16px;
@@ -307,8 +328,21 @@ html, body {
   margin-right: 8px;
 }
 
+.next-btn {
+  padding: 10px 20px;
+  margin: auto;
+  margin-top: 20px;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
 .confirm-btn {
   padding: 10px 20px;
+  margin: auto;
   margin-top: 20px;
   background: #4caf50;
   color: white;
@@ -338,6 +372,31 @@ html, body {
   color: #555;
 }
 
+.gauge-effect-label {
+  width: 30px;
+  text-align: left;
+}
+
+.gauge-link {
+  display: flex;
+  align-items: flex-end; /* 下ぞろえ */
+  gap: 2px;              /* アイコンと番号の間隔 */
+}
+
+.link-number {
+  width: 14px;
+  height: 14px;
+  font-size: 10px;
+
+  background: rgb(127, 255, 0);
+  border-radius: 50%;     /* 正円 */
+  border: 1px solid black;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 /* --- ゲージマックス演出 --- */
 .popup {
   position: fixed;
@@ -360,6 +419,10 @@ html, body {
   animation: popupFade 0.3s ease-out;
 }
 
+#gaugePopupText {
+  white-space: pre-line;
+}
+
 .hidden {
   display: none;
 }
@@ -367,6 +430,86 @@ html, body {
 @keyframes popupFade {
   0% { transform: scale(0.7); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
+}
+
+/* --- 抽選者アナウンス --- */
+#announceOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.announce-content {
+  background: white;
+  padding: 20px 50px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 24px;
+}
+
+#announceText{
+  display: block;
+  margin-bottom: 20px;
+}
+
+#announceTitle {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* --- ルーレット --- */
+#rouletteOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.6);
+  display: none; /* 表示時は flex */
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 9999;
+}
+
+.rouletteWrapper {
+  position: relative;
+  width: 100dvw;
+  height: 100dvw;
+  aspect-ratio: 1 / 1; /* 正方形を維持 */
+}
+
+#rouletteCanvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#rouletteStartText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 28px;
+  padding: 5px 10px;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 10px;
+  z-index: 9999;
+}
+
+#returnButton {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
 }
 
 /* --- 選択カード中央表示 --- */
@@ -388,6 +531,7 @@ html, body {
 }
 #centerCard .card {
   width: 50dvw;
+  font-size: 4.5vw;
 }
 #centerCard.show {
   opacity: 1;
@@ -433,6 +577,7 @@ html, body {
   background: transparent;
   width: 30%;
   flex: 0 0 auto; /* 伸び縮みしないように固定 */
+  font-size: 3vw;
 }
 
 .card {
@@ -451,15 +596,16 @@ html, body {
 }
 
 .card-name {
-  font-size: 18px;
   font-weight: bold;
-  margin-bottom: 4px;
+  margin: 0.5em 0px;
+  font-size: 1.4em;
 }
 
 .card-desc {
-  font-size: 12px;
   color: #444;
+  margin: 0px 0.5em;
   line-height: 1.2;
+  font-size: 1em;
 }
 
 @keyframes cardPulse {

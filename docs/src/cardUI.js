@@ -1,4 +1,4 @@
-import { applyCardToTarget } from "./firebase.js";
+import { labelFromEffect, labelFromType } from "./gameUI.js";
 import { CARD_TEXT } from "./state.js";
 
 // --------------------------------------
@@ -60,6 +60,8 @@ export function updateHandUI(hand) {
           return;
         }
 
+        if (window.isPlayingCard) return;
+
         window.selectedCardIndex = index;
 
         // まず全カードの選択状態を解除
@@ -71,7 +73,7 @@ export function updateHandUI(hand) {
         cardDiv.classList.add("card-selected");
 
         // ここでモードを参照する
-        const mode = card.targetMode;
+        window.mode = card.targetMode;
 
         switch (mode) {
           case "single":
@@ -100,12 +102,15 @@ export function updateHandUI(hand) {
 }
 
 // --------------------------------------
-// ターゲット選択パネル表示
+// ターゲット選択表示（single）
 // --------------------------------------
-function showTargetSelectPanelSingle() {
+export function showTargetSelectPanelSingle() {
   const panel = document.getElementById("targetPanel");
   const list = document.getElementById("targetList");
   const gaugesDiv = document.getElementById("targetGaugeList");
+  document.getElementById("nextTarget").style.display = "none";
+  document.getElementById("confirmTarget").style.display = "block";
+
   const players = window.gameState.players;
 
   list.innerHTML = "";
@@ -137,7 +142,47 @@ function showTargetSelectPanelSingle() {
 }
 
 // --------------------------------------
-// ゲージ選択
+// ターゲット選択表示（double）
+// --------------------------------------
+export function showTargetSelectPanelDouble() {
+  const panel = document.getElementById("targetPanel");
+  const list = document.getElementById("targetList");
+  const gaugesDiv = document.getElementById("targetGaugeList");
+  document.getElementById("confirmTarget").style.display = "none";
+  document.getElementById("nextTarget").style.display = "block";
+
+  const players = window.gameState.players;
+
+  list.innerHTML = "";
+  gaugesDiv.innerHTML = "";
+
+  // プレイヤー一覧
+  Object.entries(players).forEach(([uid, p]) => {
+    const item = document.createElement("label");
+    item.className = "target-item";
+
+    item.innerHTML = `
+      <input type="radio" name="targetSelect" value="${uid}">
+      <span>${p.name}</span>
+    `;
+
+    const input = item.querySelector("input");
+
+    // チェックされた瞬間にゲージ選択へ
+    input.onchange = () => {
+      window.selectedTargetUid = uid;
+      window.selectedGaugeIndex = null;
+      showGaugeSelectSingle();
+    };
+
+    list.appendChild(item);
+  });
+
+  panel.classList.remove("hidden");
+}
+
+// --------------------------------------
+// ゲージ選択（single, double）
 // --------------------------------------
 function showGaugeSelectSingle() {
   const gaugesDiv = document.getElementById("targetGaugeList");
@@ -149,8 +194,7 @@ function showGaugeSelectSingle() {
   const targetPlayer = window.gameState.players[targetUid];
   const gauges = targetPlayer.gauges;
 
-  ["半揮", "満水", "キャップ"].forEach((name, idx) => {
-    const g = gauges[idx];
+  gauges.forEach((g, idx) => {
     const value = g.value;
 
     const item = document.createElement("label");
@@ -161,8 +205,17 @@ function showGaugeSelectSingle() {
 
     item.innerHTML = `
       <input type="radio" name="gaugeSelect" value="${idx}" ${disabledAttr}>
-      <span class="gauge-name">${name}</span>
+      <span class="gauge-name">${labelFromType(g.type)}</span>
       <span class="gauge-value">（ゲージ値：${value}）</span>
+      ${g.effect ? `<span class="gauge-effect-label">${labelFromEffect(g.effect)}</span>` : ""}
+      ${
+        g.link
+          ? `<span class="gauge-link">
+              ${labelFromEffect("link")}
+              <span class="link-number">${g.link.number}</span>
+            </span>`
+          : ""
+      }
     `;
 
     const input = item.querySelector("input");

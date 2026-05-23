@@ -1,13 +1,23 @@
 import { update, ref, set, get }
   from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
-import { signInAnonymously }
+import { signInAnonymously, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
 
 import { showScreen } from "./ui.js";
 import { applyCardToTarget, createRoom, joinRoom, setupPlayerList, watchGameState } from "./firebase.js";
 import { shuffle, startGame } from "./initGame.js";
-import { renderCard, showCenterCard } from "./cardUI.js";
-import { labelFromType } from "./gameUI.js";
+import { renderCard, showCenterCard, showTargetSelectPanelDouble, showTargetSelectPanelSingle } from "./cardUI.js";
+import { labelFromType, renderSelectedSummary } from "./gameUI.js";
+
+window.myUid = null;
+window.isPlayingCard = false;
+window.selectedTargets = [];
+
+onAuthStateChanged(firebaseAuth, (user) => {
+  if (user) {
+    window.myUid = user.uid;
+  }
+});
 
 // 匿名ログイン
 signInAnonymously(firebaseAuth)
@@ -64,6 +74,7 @@ document.getElementById("startGameButton").onclick = async () => {
   // ここでシャッフル
   const shuffled = shuffle(players);
   await set(ref(window.firebaseDB, `rooms/${roomId}/turnOrder`), shuffled);
+  await set(ref(window.firebaseDB, `rooms/${roomId}/linkCounter`), 0);
   await startGame(roomId, players);
 };
 
@@ -80,14 +91,15 @@ document.getElementById("orderOkButton").onclick = () => {
 
 document.getElementById("closeTargetPanel").onclick = () => {
   document.getElementById("targetPanel").classList.add("hidden");
+  isPlayingCard = false;
+  window.selectedTargets = []; //ターゲット配列をリセット
+  renderSelectedSummary();
 };
 
 // --------------------------------------
-// カード効果対象確定
+// カード効果対象追加（最後の1人以外）
 // --------------------------------------
-document.getElementById("confirmTarget").onclick = () => {
-  console.log("DEBUG gaugeIdx:", window.selectedGaugeIndex);
-
+document.getElementById("nextTarget").onclick = () => {
   const checked = [...document.querySelectorAll("#targetList input:checked")]
     .map(input => input.value);
 
@@ -96,7 +108,62 @@ document.getElementById("confirmTarget").onclick = () => {
     return;
   }
 
-  console.log("選択されたターゲット:", checked);
+  const uid = window.selectedTargetUid;
+  const gaugeIndex = window.selectedGaugeIndex;
+
+  if (gaugeIndex == null) {
+    alert("ゲージを選択してください");
+    return;
+  }
+
+  window.isPlayingCard = true;
+
+  // ターゲットをpush
+  window.selectedTargets.push({
+    uid,
+    gaugeIndex: gaugeIndex
+  });
+  renderSelectedSummary();
+
+  // 次の選択のために UI 状態をリセット
+  window.selectedTargetUid = null;
+  window.selectedGaugeIndex = null;
+
+  // UI 更新
+  switch (window.mode) {
+    case "single":
+    showTargetSelectPanelSingle();
+    break;
+
+    case "multi":
+    showTargetSelectPanelMulti();
+    break;
+
+    case "double":
+    showTargetSelectPanelSingle();
+    break;
+
+    case "direction":
+    showTargetSelectPanelDirection();
+    break;
+
+    default:
+    console.warn("未知の targetMode:", mode);
+    break;
+  }
+};
+
+// --------------------------------------
+// カード効果対象確定
+// --------------------------------------
+document.getElementById("confirmTarget").onclick = () => {
+  const checked = [...document.querySelectorAll("#targetList input:checked")]
+    .map(input => input.value);
+
+  if (checked.length === 0) {
+    alert("ターゲットを選択してください");
+    return;
+  }
 
   const myId = window.firebaseAuth.currentUser.uid;
   const roomId = window.pendingRoomId;
@@ -108,16 +175,23 @@ document.getElementById("confirmTarget").onclick = () => {
     return;
   }
 
+  window.isPlayingCard = true;
+  window.selectedTargets.push({
+    uid: window.selectedTargetUid,
+    gaugeIndex: window.selectedGaugeIndex
+  });
+
+  const targets = window.selectedTargets;
+  window.selectedTargets = []; //ターゲット配列をリセット
+  renderSelectedSummary();
+
   // カード使用イベントを Firebase に書き込む
-  const gameStateRef = ref(firebaseDB, `rooms/${roomId}/gameState`);
+  const gameStateRef = ref(firebaseDB, `rooms/${roomId}/gameState/cardEvent`);
   update(gameStateRef, {
-    cardEvent: {
-      uid: myId,
-      cardIndex: window.selectedCardIndex,
-      targetUid,
-      gaugeIdx,
-      timestamp: Date.now()
-    }
+    uid: myId,
+    cardIndex: window.selectedCardIndex,
+    targets,
+    timestamp: Date.now()
   });
 
   document.getElementById("targetPanel").classList.add("hidden");
@@ -143,7 +217,21 @@ document.getElementById("confirmTarget").onclick = () => {
   `;
 
   showCenterCard(html, () => {
-    applyCardToTarget(roomId, selectedCardIndex, targetUid, gaugeIdx);
+    applyCardToTarget(roomId, selectedCardIndex, targets);
     window.selectedGaugeIndex = null;
   });
+};
+
+document.getElementById("returnButton").onclick = () => {
+  set(ref(firebaseDB, `rooms/${pendingRoomId}/gameState/phase`), "title");
+};
+
+document.getElementById("announceButton").onclick = () => {
+  const roomId = window.pendingRoomId;
+
+  // 抽選者だけが押せる前提
+  set(ref(firebaseDB, `rooms/${roomId}/gameState/phase`), "roulette");
+
+  const overlay = document.getElementById("announceOverlay");
+  overlay.style.display = "none";
 };

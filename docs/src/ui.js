@@ -1,6 +1,3 @@
-// ui.js
-// 画面遷移だけを担当する。状態は一切持たない。
-
 export function showScreen(id) {
   const screens = [
     "titleScreen",
@@ -23,7 +20,11 @@ export function showScreen(id) {
   }
 
   // ゲーム画面だけ flex
-  target.style.display = (id === "gameScreen") ? "flex" : "block";
+  if (id === "gameScreen" || id === "titleScreen") {
+    target.style.display = "flex";
+  } else {
+    target.style.display = "block";
+  }
 }
 
 // --------------------------------------
@@ -44,4 +45,34 @@ export function showOrderScreen(order) {
     .join("");
 
   showScreen("orderScreen");
+}
+
+export function showAnnounceOverlay(name, isAnnouncer) {
+  const overlay = document.getElementById("announceOverlay");
+  const text = document.getElementById("announceText");
+  const btn = document.getElementById("announceButton");
+
+  text.textContent = `${name} が抽選を行います！`;
+
+  if (isAnnouncer) {
+    btn.classList.remove("hidden");
+  } else {
+    btn.classList.add("hidden");
+  }
+
+  overlay.style.display = "flex";
+}
+
+export function hideAnnounceOverlay() {
+  const overlay = document.getElementById("announceOverlay");
+  overlay.style.display = "none";
+}
+
+export function showTitleScreen() {
+  // ルーム情報をクリア
+  window.pendingRoomId = null;
+  window.gameState = null;
+
+  // タイトル画面を表示
+  showScreen("titleScreen")
 }

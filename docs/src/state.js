@@ -55,22 +55,22 @@ export const CARD_TEXT = {
 };
 
 export const CARD_POOL = [
-  ...Array(20).fill({ type: "double", targetMode: "single" }),          //ダブル  10枚
+  ...Array(10).fill({ type: "double", targetMode: "single" }),          //ダブル  10枚
   ...Array(10).fill({ type: "half", targetMode: "single" }),             //ハーフ  5枚
   ...Array(10).fill({ type: "signFlip", targetMode: "single" }),         //符号反転  5枚
   ...Array(10).fill({ type: "share", targetMode: "double" }),            //ゲージ共有　8枚
-  //...Array(20).fill({ type: "cancel", targetMode: "single" }),           //解除  8枚
+  ...Array(10).fill({ type: "cancel", targetMode: "single" }),           //解除  8枚
   ...Array(10).fill({ type: "reset", targetMode: "single" }),            //リセット  5枚
-  ...Array(20).fill({ type: "typeSwap", targetMode: "double" }),        //タイプ交換  10枚
+  ...Array(10).fill({ type: "typeSwap", targetMode: "double" }),        //タイプ交換  10枚
   //...Array(10).fill({ type: "valueSwap", targetMode: "double" }),       //ゲージ値交換
-  ...Array(20).fill({ type: "gaugeSwap", targetMode: "double" }),       //ゲージ交換  10枚
+  ...Array(10).fill({ type: "gaugeSwap", targetMode: "double" }),       //ゲージ交換  10枚
   //...Array(10).fill({ type: "copy", targetMode: "direction" }),         //コピー
-  //...Array(5).fill({ type: "shuffle", targetMode: "multi" }),           //シャッフル
-  //...Array(8).fill({ type: "transfer", targetMode: "direction" }),      //譲渡
-  ...Array(15).fill({ type: "delta", value: -1, targetMode: "single" }),  //-1
-  ...Array(27).fill({ type: "delta", value: +1, targetMode: "single" }),  //+1
-  ...Array(10).fill({ type: "delta", value: -2, targetMode: "single" }),  //-2
-  ...Array(26).fill({ type: "delta", value: +2, targetMode: "single" }),  //+2
-  ...Array(5).fill({ type: "delta", value: -3, targetMode: "single" }),   //-3
-  ...Array(23).fill({ type: "delta", value: +3, targetMode: "single" })   //+3
+  //...Array(10).fill({ type: "shuffle", targetMode: "multi" }),           //シャッフル
+  //...Array(10).fill({ type: "transfer", targetMode: "direction" }),      //譲渡
+  ...Array(30).fill({ type: "delta", value: -1, targetMode: "single" }),  //-1
+  ...Array(40).fill({ type: "delta", value: +1, targetMode: "single" }),  //+1
+  ...Array(25).fill({ type: "delta", value: -2, targetMode: "single" }),  //-2
+  ...Array(35).fill({ type: "delta", value: +2, targetMode: "single" }),  //+2
+  ...Array(20).fill({ type: "delta", value: -3, targetMode: "single" }),  //-3
+  ...Array(30).fill({ type: "delta", value: +3, targetMode: "single" })   //+3
 ];

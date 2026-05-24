@@ -252,7 +252,7 @@ export async function applyCardEffect(state, uid, card, targets) {
         const linkedGauge = newState.players[old.uid].gauges[old.gaugeIndex];
 
         // 相手側のリンク先を「新しい g1 の位置（t2）」に更新
-        linkedGauge.link = { uid: t2.uid, gaugeIndex: t2.gaugeIndex };
+        linkedGauge.link = { uid: t2.uid, gaugeIndex: t2.gaugeIndex, number: old.number };
       }
 
       if (g2.link) {
@@ -260,7 +260,7 @@ export async function applyCardEffect(state, uid, card, targets) {
         const linkedGauge = newState.players[old.uid].gauges[old.gaugeIndex];
 
         // 相手側のリンク先を「新しい g2 の位置（t1）」に更新
-        linkedGauge.link = { uid: t1.uid, gaugeIndex: t1.gaugeIndex };
+        linkedGauge.link = { uid: t1.uid, gaugeIndex: t1.gaugeIndex, number: old.number };
       }
       return { state: newState, isMax, gaugeType: null };
     }

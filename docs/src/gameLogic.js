@@ -231,6 +231,37 @@ export async function applyCardEffect(state, uid, card, targets) {
       return { state: newState, isMax, gaugeType: g.type };
     }
 
+    case "valueSwap": { // ゲージ値交換
+      const t1 = targets[0];
+      const t2 = targets[1];
+
+      const p1 = newState.players[t1.uid];
+      const p2 = newState.players[t2.uid];
+
+      const g1 = p1.gauges[t1.gaugeIndex];
+      const g2 = p2.gauges[t2.gaugeIndex];
+
+      // 値だけ交換
+      const tempValue = g1.value;
+      g1.value = g2.value;
+      g2.value = tempValue;
+
+      // リンクしている場合はリンク先にも反映
+      if (g1.link) {
+        const link = g1.link;
+        const g1Linked = newState.players[link.uid].gauges[link.gaugeIndex];
+        g1Linked.value = g1.value;
+      }
+
+      if (g2.link) {
+        const link = g2.link;
+        const g2Linked = newState.players[link.uid].gauges[link.gaugeIndex];
+        g2Linked.value = g2.value;
+      }
+
+      return { state: newState, isMax: false, gaugeType: null };
+    }
+
     case "gaugeSwap": { // ゲージ交換
       const t1 = targets[0];
       const t2 = targets[1];

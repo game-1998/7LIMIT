@@ -43,6 +43,68 @@ html, body {
   cursor: pointer;
 }
 
+#cardListModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+  position: relative;
+  background: #fff;
+  width: 80vw;
+  margin: 5% auto;
+  padding: 5px;
+  border-radius: 12px;
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardListScroll {
+  width: 100%;
+  overflow-y: auto;
+  margin-top: 28px;
+  padding: 15px; /* ← スクロールバーで内容が隠れないように */
+  box-sizing: border-box;
+}
+
+#cardListGrid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, calc((100% - 8vw) / 3));
+  gap: 4vw;
+  box-sizing: border-box;
+  font-size: 2.8vw;
+}
+
+#closeCardList.close {
+  width: auto;
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  right: 28px;
+  top: 6px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  user-select: none;
+  line-height: 1;         /* ← 縦の余白を最小化 */
+}
+
+.card-group-title {
+  grid-column: 1 / -1; /* 3列をまたぐ */
+  font-size: 20px;
+  font-weight: bold;
+  margin: 20px 0 0;
+  padding: 5px;
+  color: #333;
+  border-top: 2px solid #acacac;
+  border-bottom: 2px solid #acacac;
+}
+
 /* --- プレイヤー名・パスワード入力画面 ----------------------------------------- */
 #nameAndPasswordScreen {
   display: flex;
@@ -328,6 +390,25 @@ html, body {
   margin-right: 8px;
 }
 
+#targetList input[type="checkbox"],
+#targetList input[type="radio"],
+#targetGaugeList input[type="radio"] {
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  border: 1px solid #777777;
+  border-radius: 50%; /* ← 丸くする */
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+#targetList input[type="checkbox"]:checked,
+#targetList input[type="radio"]:checked,
+#targetGaugeList input[type="radio"]:checked {
+  background-color: #0059ff;
+  box-shadow: 0 0 0 1.5px #ffffff inset;
+}
+
 .next-btn {
   padding: 10px 20px;
   margin: auto;
@@ -585,7 +666,7 @@ html, body {
   width: 100%;
   background: #eee;
   border-radius: 8px;
-  border: 2px solid #aaa;
+  border: 2px solid #969696;
   opacity: 1;
   transition: opacity 0.2s ease;
 }
@@ -602,7 +683,7 @@ html, body {
 }
 
 .card-desc {
-  color: #444;
+  color: #2c2c2c;
   margin: 0px 0.5em;
   line-height: 1.2;
   font-size: 1em;

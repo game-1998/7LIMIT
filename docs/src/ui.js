@@ -1,3 +1,6 @@
+import { renderCard } from "./cardUI.js";
+import { CARD_TEXT } from "./state.js";
+
 export function showScreen(id) {
   const screens = [
     "titleScreen",
@@ -76,3 +79,44 @@ export function showTitleScreen() {
   // タイトル画面を表示
   showScreen("titleScreen")
 }
+
+// カード一覧を表示
+function renderCardList() {
+  const grid = document.getElementById("cardListGrid");
+  grid.innerHTML = "";
+
+  // 並び順の定義
+  const deltaValues = [-3, -2, -1, 1, 2, 3];
+  const persistent = ["double", "half", "signFlip", "share"];
+  const single = [
+    "cancel", "reset", "typeSwap", "valueSwap",
+    "gaugeSwap", "copy", "shuffle", "transfer"
+  ];
+
+  // グループタイトルを追加する関数
+  const addGroupTitle = (title) => {
+    grid.insertAdjacentHTML(
+      "beforeend",
+      `<div class="card-group-title">${title}</div>`
+    );
+  };
+
+  // カード追加
+  const addCard = (card) => {
+    grid.insertAdjacentHTML("beforeend", renderCard(card));
+  };
+
+  // delta（6種類）
+  addGroupTitle("増減カード");
+  deltaValues.forEach(value => addCard({ type: "delta", value }));
+
+  // 永続効果
+  addGroupTitle("永続効果");
+  persistent.forEach(type => addCard({ type }));
+
+  // 単発効果
+  addGroupTitle("単発効果");
+  single.forEach(type => addCard({ type }));
+}
+
+renderCardList();

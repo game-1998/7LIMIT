@@ -1,5 +1,6 @@
 import { update, ref, set, get, runTransaction }
   from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+import { shuffle } from "./initGame.js";
 
 // --------------------------------------
 // カードを1枚引く
@@ -52,7 +53,7 @@ export async function applyCardEffect(state, uid, card, targets) {
         g2.effect = "double";
       }
 
-      return { state: newState, isMax, gaugeType: g.type };
+      return { state: newState, isMax, target: t, gaugeType: g.type };
     }
 
     case "half": { // ハーフ
@@ -67,7 +68,7 @@ export async function applyCardEffect(state, uid, card, targets) {
         g2.effect = "half";
       }
 
-      return { state: newState, isMax, gaugeType: g.type };
+      return { state: newState, isMax, target: t, gaugeType: g.type };
     }
 
     case "signFlip": { // 符号反転
@@ -82,7 +83,7 @@ export async function applyCardEffect(state, uid, card, targets) {
         g2.effect = "signFlip";
       }
 
-      return { state: newState, isMax, gaugeType: g.type };
+      return { state: newState, isMax, target: t, gaugeType: g.type };
     }
 
     case "share": { // 共有（リンクの付け方は未実装）
@@ -91,12 +92,12 @@ export async function applyCardEffect(state, uid, card, targets) {
       const g1 = newState.players[t1.uid].gauges[t1.gaugeIndex];
       const g2 = newState.players[t2.uid].gauges[t2.gaugeIndex];
 
-      // ① 初期値を平均にする
+      // 初期値を平均にする
       const avg = (g1.value + g2.value) / 2;
       g1.value = avg;
       g2.value = avg;
 
-      // ② 永続効果が両方にある場合はランダムで片方だけ残す
+      // 永続効果が両方にある場合はランダムで片方だけ残す
       if (g1.effect && g2.effect) {
         if (Math.random() < 0.5) {
           g2.effect = null;
@@ -105,7 +106,7 @@ export async function applyCardEffect(state, uid, card, targets) {
         }
       }
 
-      // ③ 片方だけ永続効果がある場合 → もう片方にコピー
+      // 片方だけ永続効果がある場合 → もう片方にコピー
       if (g1.effect && !g2.effect) g2.effect = g1.effect;
       if (!g1.effect && g2.effect) g1.effect = g2.effect;
 
@@ -133,11 +134,11 @@ export async function applyCardEffect(state, uid, card, targets) {
       const snap = await get(roomRef);
       const linkNumber = snap.val();
 
-      // ④ リンクを張る（相互リンク）
+      // リンクを張る（相互リンク）
       g1.link = { uid: t2.uid, gaugeIndex: t2.gaugeIndex, number: linkNumber };
       g2.link = { uid: t1.uid, gaugeIndex: t1.gaugeIndex, number: linkNumber };
 
-      return { state: newState, isMax, gaugeType: null };
+      return { state: newState, isMax, target: t1, gaugeType: null };
     }
 
     case "cancel": { // 解除
@@ -152,7 +153,7 @@ export async function applyCardEffect(state, uid, card, targets) {
         g2.effect = null;
       }
 
-      return { state: newState, isMax, gaugeType: g.type };
+      return { state: newState, isMax, target: t, gaugeType: g.type };
     }
 
     case "delta": {// ゲージ増減
@@ -196,7 +197,7 @@ export async function applyCardEffect(state, uid, card, targets) {
         }
       }
 
-      return { state: newState, isMax, gaugeType: g.type };
+      return { state: newState, isMax, target: t, gaugeType: g.type };
     }
 
     case "typeSwap": { // タイプ交換
@@ -214,7 +215,7 @@ export async function applyCardEffect(state, uid, card, targets) {
       g1.type = g2.type;
       g2.type = tmp;
 
-      return { state: newState, isMax, gaugeType: null };
+      return { state: newState, isMax, target: t1, gaugeType: null };
     }
 
     case "reset": { // リセット
@@ -228,7 +229,7 @@ export async function applyCardEffect(state, uid, card, targets) {
         g2.value = 0;
       }
 
-      return { state: newState, isMax, gaugeType: g.type };
+      return { state: newState, isMax, target: t, gaugeType: g.type };
     }
 
     case "valueSwap": { // ゲージ値交換
@@ -259,7 +260,7 @@ export async function applyCardEffect(state, uid, card, targets) {
         g2Linked.value = g2.value;
       }
 
-      return { state: newState, isMax: false, gaugeType: null };
+      return { state: newState, isMax: false, target: t1, gaugeType: null };
     }
 
     case "gaugeSwap": { // ゲージ交換
@@ -293,9 +294,151 @@ export async function applyCardEffect(state, uid, card, targets) {
         // 相手側のリンク先を「新しい g2 の位置（t1）」に更新
         linkedGauge.link = { uid: t1.uid, gaugeIndex: t1.gaugeIndex, number: old.number };
       }
-      return { state: newState, isMax, gaugeType: null };
+      return { state: newState, isMax, target: t1, gaugeType: null };
     }
     
+    case "copy": { // コピー
+      const from = targets[0]; // コピー元（自分）
+      const to   = targets[1]; // コピー先（他プレイヤー）
+
+      const pFrom = newState.players[from.uid];
+      const pTo   = newState.players[to.uid];
+
+      const gFrom = pFrom.gauges[from.gaugeIndex];
+      const gTo   = pTo.gauges[to.gaugeIndex];
+
+      // 値をコピー（from → to）
+      gTo.value = gFrom.value;
+
+      // コピー先がリンクしていたら、リンク相手にも反映
+      if (gTo.link) {
+        const link = gTo.link;
+        const linkedGauge = newState.players[link.uid].gauges[link.gaugeIndex];
+        linkedGauge.value = gTo.value;
+      }
+
+      return { state: newState, isMax, target: to, gaugeType: null };
+    }
+
+    case "transfer": { // 譲渡
+      const from = targets[0]; // 自分
+      const to   = targets[1]; // 相手
+
+      const pFrom = newState.players[from.uid];
+      const pTo   = newState.players[to.uid];
+
+      const gFrom = pFrom.gauges[from.gaugeIndex];
+      const gTo   = pTo.gauges[to.gaugeIndex];
+
+      // 譲渡量
+      const amount = gFrom.value;
+
+      // 自分のゲージを 0 にする
+      gFrom.value = 0;
+
+      // 自分がリンクしていたら相手側も 0 にする
+      if (gFrom.link) {
+        const link = gFrom.link;
+        const linkedGauge = newState.players[link.uid].gauges[link.gaugeIndex];
+        linkedGauge.value = 0;
+      }
+
+      // 相手に加算
+      gTo.value += amount;
+
+      // 相手がリンクしていたらリンク相手にも反映
+      if (gTo.link) {
+        const link = gTo.link;
+        const linkedGauge = newState.players[link.uid].gauges[link.gaugeIndex];
+        linkedGauge.value = gTo.value;
+      }
+
+      // MAX 判定
+      const GAUGE_MAX = 7;
+
+      if (gTo.value >= GAUGE_MAX) {
+        gTo.value = GAUGE_MAX;
+        gTo.locked = true;
+        isMax = true;
+
+        // リンク先もロック
+        if (gTo.link) {
+          const link = gTo.link;
+          const linkedGauge = newState.players[link.uid].gauges[link.gaugeIndex];
+          linkedGauge.value = GAUGE_MAX;
+          linkedGauge.locked = true;
+        }
+      }
+
+      return { state: newState, isMax, target: to, gaugeType: gTo.type };
+    }
+
+    case "shuffle": { // シャッフル
+      // 選択プレイヤーのゲージを全部集める
+      let pool = [];
+      let linkPairs = [];
+      for (const t of targets) {
+        const p = newState.players[t.uid];
+        p.gauges.forEach((g, i) => {
+          if (g.link) {
+            linkPairs.push({
+              g1: g, // ゲージオブジェクトそのもの
+              g2: newState.players[g.link.uid].gauges[g.link.gaugeIndex],
+              link1: structuredClone(g.link), // 元のリンク情報を保存
+              link2: structuredClone(
+                newState.players[g.link.uid].gauges[g.link.gaugeIndex].link
+              )
+            });
+          }
+        });
+        pool.push(...p.gauges);
+      }
+
+      // 古いリンクを全部消す
+      for (const t of targets) {
+        const p = newState.players[t.uid];
+        for (const g of p.gauges) {
+          g.link = null;
+        }
+      }
+
+      // シャッフル
+      shuffle(pool);
+
+      // 配り直す
+      let index = 0;
+      let newPositions = new Map();
+      for (const t of targets) {
+        const p = newState.players[t.uid];
+        for (let i = 0; i < p.gauges.length; i++) {
+          p.gauges[i] = pool[index++];
+          newPositions.set(p.gauges[i], { uid: t.uid, gaugeIndex: i });
+        }
+      }
+
+      for (const pair of linkPairs) {
+        const new1 = newPositions.get(pair.g1);
+        const new2 = newPositions.get(pair.g2);
+
+        if (!new1 || !new2) continue; // 念のため
+
+        // g1 → g2 のリンク
+        const newLink1 = structuredClone(pair.link1);
+        newLink1.uid = new2.uid;
+        newLink1.gaugeIndex = new2.gaugeIndex;
+
+        newState.players[new1.uid].gauges[new1.gaugeIndex].link = newLink1;
+
+        // g2 → g1 のリンク
+        const newLink2 = structuredClone(pair.link2);
+        newLink2.uid = new1.uid;
+        newLink2.gaugeIndex = new1.gaugeIndex;
+
+        newState.players[new2.uid].gauges[new2.gaugeIndex].link = newLink2;
+      }
+
+      return { state: newState, isMax, target: targets[0], gaugeType: null };
+    }
   }
 }
 

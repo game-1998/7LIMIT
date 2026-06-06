@@ -280,13 +280,14 @@ export async function applyCardToTarget(roomId, cardIndex, targets) {
 
   const uid = window.firebaseAuth.currentUser.uid;
   const card = state.players[uid].hand[cardIndex];
-  const t0 = targets[0];
-  const targetUid = t0.uid;
-  const targetGaugeIndex = t0.gaugeIndex;
+  
 
   // ゲージ更新＋MAX判定
   const result = await applyCardEffect(state, uid, card, targets);
   const updatedState = result.state;
+  const t0 = result.target;
+  const targetUid = t0.uid;
+  const targetGaugeIndex = t0.gaugeIndex;
 
   // Firebase に書き込み
   await set(gameRef, updatedState);
@@ -416,9 +417,9 @@ function buildTargetAnnouncement(state, card, targets) {
       <div class="center-target">
         ターゲット：<br>
         <span class="second-line">
-          ${p1.name} の 「${labelFromType(p1.gauges[t1.gaugeIndex].type)}」 ゲージ<br>
+          ${pFrom.name} の 「${labelFromType(pFrom.gauges[from.gaugeIndex].type)}」 ゲージ<br>
           ↓<br>
-          ${p2.name} の 「${labelFromType(p2.gauges[t2.gaugeIndex].type)}」 ゲージ
+          ${pTo.name} の 「${labelFromType(pTo.gauges[to.gaugeIndex].type)}」 ゲージ
         </span>
       </div>
     `;
@@ -431,7 +432,7 @@ function buildTargetAnnouncement(state, card, targets) {
         const p = state.players[t.uid];
         return `${p.name}`;
       })
-      .join("、");
+      .join("<br>");
 
     return `
       <div class="center-target">

@@ -7,18 +7,21 @@ import { CARD_TEXT } from "./state.js";
 export function renderCard(card) {
   let displayName;
   let displayDesc;
+  let displayColor;
 
   if (card.type === "delta") {
     displayName = (card.value > 0 ? "+" : "") + card.value;
     displayDesc = CARD_TEXT.delta(card.value).desc;
+    displayColor = CARD_TEXT.delta(card.value).color;
   } else {
     const info = CARD_TEXT[card.type];
     displayName = info.name;
     displayDesc = info.desc;
+    displayColor = info.color;
   }
 
   return `
-    <div class="card">
+    <div class="card" style="background-color:${displayColor}">
       <div class="card-name">${displayName}</div>
       <div class="card-desc">${displayDesc}</div>
     </div>
@@ -110,6 +113,7 @@ export function showTargetSelectPanelSingle() {
   const gaugesDiv = document.getElementById("targetGaugeList");
   document.getElementById("nextTarget").style.display = "none";
   document.getElementById("confirmTarget").style.display = "block";
+  document.getElementById("confirmTargets").style.display = "none";
 
   const players = window.gameState.players;
 
@@ -150,6 +154,7 @@ export function showTargetSelectPanelDouble() {
   const gaugesDiv = document.getElementById("targetGaugeList");
   document.getElementById("confirmTarget").style.display = "none";
   document.getElementById("nextTarget").style.display = "block";
+  document.getElementById("confirmTargets").style.display = "none";
 
   const players = window.gameState.players;
 
@@ -174,6 +179,72 @@ export function showTargetSelectPanelDouble() {
       window.selectedGaugeIndex = null;
       showGaugeSelectSingle();
     };
+
+    list.appendChild(item);
+  });
+
+  panel.classList.remove("hidden");
+}
+
+// --------------------------------------
+// ターゲット選択表示（direction）
+// --------------------------------------
+export function showTargetSelectPanelDirection() {
+  const panel = document.getElementById("targetPanel");
+  const list = document.getElementById("targetList");
+  const gaugesDiv = document.getElementById("targetGaugeList");
+
+  document.getElementById("nextTarget").style.display = "block";
+  document.getElementById("confirmTarget").style.display = "none";
+  document.getElementById("confirmTargets").style.display = "none";
+
+  list.innerHTML = "";
+  gaugesDiv.innerHTML = "";
+
+  const myId = window.myUid;
+  window.selectedTargetUid = myId;
+  const gauges = window.gameState.players[myId].gauges;
+  const p = window.gameState.players[myId];
+
+  const item = document.createElement("label");
+  item.className = "target-item";
+
+  item.innerHTML = `
+    <input type="radio" name="targetSelect" checked>
+    <span>${p.name}</span>
+  `;
+  list.appendChild(item);
+
+  // 自分のゲージ3本を表示
+  showGaugeSelectSingle();
+
+  panel.classList.remove("hidden");
+}
+
+export function showTargetSelectPanelMulti() {
+  const panel = document.getElementById("targetPanel");
+  const list = document.getElementById("targetList");
+  const gaugesDiv = document.getElementById("targetGaugeList");
+
+  // multi 選択なので nextTarget は不要
+  document.getElementById("nextTarget").style.display = "none";
+  document.getElementById("confirmTarget").style.display = "none";
+  document.getElementById("confirmTargets").style.display = "block";
+
+  list.innerHTML = "";
+  gaugesDiv.innerHTML = ""; // ゲージ選択は不要
+
+  const players = window.gameState.players;
+
+  // プレイヤー一覧（チェックボックス）
+  Object.entries(players).forEach(([uid, p]) => {
+    const item = document.createElement("label");
+    item.className = "target-item";
+
+    item.innerHTML = `
+      <input type="checkbox" name="multiSelect" value="${uid}">
+      <span>${p.name}</span>
+    `;
 
     list.appendChild(item);
   });

@@ -93,6 +93,7 @@ document.getElementById("closeTargetPanel").onclick = () => {
   document.getElementById("targetPanel").classList.add("hidden");
   isPlayingCard = false;
   window.selectedTargets = []; //ターゲット配列をリセット
+  window.selectedTargetUid = null;
   renderSelectedSummary();
 };
 
@@ -100,10 +101,7 @@ document.getElementById("closeTargetPanel").onclick = () => {
 // カード効果対象追加（最後の1人以外）
 // --------------------------------------
 document.getElementById("nextTarget").onclick = () => {
-  const checked = [...document.querySelectorAll("#targetList input:checked")]
-    .map(input => input.value);
-
-  if (checked.length === 0) {
+  if (window.selectedTargetUid === null) {
     alert("ターゲットを選択してください");
     return;
   }
@@ -144,7 +142,7 @@ document.getElementById("nextTarget").onclick = () => {
     break;
 
     case "direction":
-    showTargetSelectPanelDirection();
+    showTargetSelectPanelSingle();
     break;
 
     default:
@@ -154,7 +152,7 @@ document.getElementById("nextTarget").onclick = () => {
 };
 
 // --------------------------------------
-// カード効果対象確定
+// カード効果対象確定（shuffle以外）
 // --------------------------------------
 document.getElementById("confirmTarget").onclick = () => {
   const checked = [...document.querySelectorAll("#targetList input:checked")]
@@ -183,6 +181,7 @@ document.getElementById("confirmTarget").onclick = () => {
 
   const targets = window.selectedTargets;
   window.selectedTargets = []; //ターゲット配列をリセット
+  window.selectedTargetUid = null;
   renderSelectedSummary();
 
   // カード使用イベントを Firebase に書き込む
@@ -222,6 +221,66 @@ document.getElementById("confirmTarget").onclick = () => {
   });
 };
 
+// --------------------------------------
+// カード効果対象確定（shuffle）
+// --------------------------------------
+document.getElementById("confirmTargets").onclick = () => {
+  const checked = [...document.querySelectorAll("#targetList input:checked")]
+    .map(input => input.value);
+
+  if (checked.length === 0) {
+    alert("ターゲットを選択してください");
+    return;
+  }
+
+  const myId = window.firebaseAuth.currentUser.uid;
+  const roomId = window.pendingRoomId;
+
+  window.isPlayingCard = true;
+
+  // ★ シャッフル対象プレイヤー
+  const targets = checked.map(uid => ({ uid }));
+
+  // ★ リセット
+  window.selectedTargets = [];
+  window.selectedTargetUid = null;
+  renderSelectedSummary();
+
+  // ★ Firebase に書き込み
+  const gameStateRef = ref(firebaseDB, `rooms/${roomId}/gameState/cardEvent`);
+  update(gameStateRef, {
+    uid: myId,
+    cardIndex: window.selectedCardIndex,
+    targets,
+    timestamp: Date.now()
+  });
+
+  // ★ パネルを閉じる
+  document.getElementById("targetPanel").classList.add("hidden");
+
+  // ★ 中央カード演出（プレイヤー名一覧）
+  const card = window.gameState.players[myId].hand[window.selectedCardIndex];
+  const cardHtml = renderCard(card);
+
+  const names = checked
+    .map(uid => window.gameState.players[uid].name)
+    .join("、");
+
+  const html = `
+    <div class="center-card-wrapper">
+      <div class="center-target">
+        対象プレイヤー：<br>
+        <span class="second-line">${names}</span>
+      </div>
+      ${cardHtml}
+    </div>
+  `;
+
+  showCenterCard(html, () => {
+    applyCardToTarget(roomId, selectedCardIndex, targets);
+  });
+};
+
 document.getElementById("returnButton").onclick = () => {
   set(ref(firebaseDB, `rooms/${pendingRoomId}/gameState/phase`), "title");
 };
@@ -235,3 +294,11 @@ document.getElementById("announceButton").onclick = () => {
   const overlay = document.getElementById("announceOverlay");
   overlay.style.display = "none";
 };
+
+document.getElementById("openCardList").addEventListener("click", () => {
+  document.getElementById("cardListModal").style.display = "block";
+});
+
+document.getElementById("closeCardList").addEventListener("click", () => {
+  document.getElementById("cardListModal").style.display = "none";
+});

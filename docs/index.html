@@ -14,7 +14,16 @@
 
     <button id="createRoomButton">ルームを作成</button>
     <button id="joinRoomButton">ルームに参加</button>
-    <button id="openSkillListButton">スキル一覧</button>
+    <button id="openCardList">カード一覧</button>
+
+    <div id="cardListModal" class="modal" style="display:none;">
+      <div class="modal-content">
+        <button id="closeCardList" class="close">&times;</button>
+        <div class="cardListScroll">
+          <div id="cardListGrid"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="nameAndPasswordScreen" style="display:none;">
@@ -76,6 +85,7 @@
       <div id="targetGaugeList"></div>
       <button id="nextTarget" class="next-btn">次を選択</button>
       <button id="confirmTarget" class="confirm-btn">確定</button>
+      <button id="confirmTargets" class="confirm-btn">確定</button>
     </div>
 
     <div id="gaugePopup" class="popup hidden">
@@ -115,6 +125,6 @@
 
   </div>
 
-  <script type="module" src="src/main.js?v=20260526"></script>
+  <script type="module" src="src/main.js?v=20260606"></script>
 </body>
 </html>
